@@ -1,0 +1,125 @@
+SELECT * 
+FROM sql_project.train_churn;
+
+CREATE TABLE sql_project.Churn_Staging
+LIKE sql_project.train_churn;
+
+INSERT sql_project.Churn_Staging
+SELECT *
+FROM sql_project.train_churn;
+
+
+-- 1. Removing duplicates if there is any
+
+WITH duplicate_cte AS
+(
+SELECT *,
+ROW_NUMBER() OVER(PARTITION BY Age, AvgMonthlyGBDownload, AvgMonthlyLongDistanceCharges, ChurnCategory, ChurnReason, ChurnScore, City, CLTV, Contract, Country, CustomerID, CustomerStatus, Dependents, DeviceProtectionPlan, Gender, InternetService, InternetType, LatLong, Latitude, Longitude, Married, MonthlyCharge, MultipleLines, Number_of_Dependents, Number_of_Referrals, Offer, OnlineBackup, OnlineSecurity, PaperlessBilling, Partner, PaymentMethod, PhoneService, Population, PremiumTechSupport, Quarter, ReferredaFriend, SatisfactionScore, SeniorCitizen, State, StreamingMovies, StreamingMusic, StreamingTV, TenureinMonths, TotalCharges, TotalExtraDataCharges, TotalLongDistanceCharges, TotalRefunds, TotalRevenue, Under30, UnlimitedData, ZipCode, Churn) AS row_num
+FROM sql_project1.telco_customer_churn
+)
+SELECT *
+FROM duplicate_cte
+WHERE row_num>1;
+
+-- As there is no duplicates,row doesnot need to be removed.
+
+
+CREATE TABLE `churn_staging1` (
+  `Age` int DEFAULT NULL,
+  `AvgMonthlyGBDownload` int DEFAULT NULL,
+  `AvgMonthlyLongDistanceCharges` double DEFAULT NULL,
+  `ChurnCategory` text,
+  `ChurnReason` text,
+  `ChurnScore` int DEFAULT NULL,
+  `City` text,
+  `CLTV` int DEFAULT NULL,
+  `Contract` text,
+  `Country` text,
+  `CustomerID` text,
+  `CustomerStatus` text,
+  `Dependents` int DEFAULT NULL,
+  `DeviceProtectionPlan` int DEFAULT NULL,
+  `Gender` text,
+  `InternetService` int DEFAULT NULL,
+  `InternetType` text,
+  `LatLong` text,
+  `Latitude` double DEFAULT NULL,
+  `Longitude` double DEFAULT NULL,
+  `Married` int DEFAULT NULL,
+  `MonthlyCharge` double DEFAULT NULL,
+  `MultipleLines` int DEFAULT NULL,
+  `Number_of_Dependents` int DEFAULT NULL,
+  `Number_of_Referrals` int DEFAULT NULL,
+  `Offer` text,
+  `OnlineBackup` int DEFAULT NULL,
+  `OnlineSecurity` int DEFAULT NULL,
+  `PaperlessBilling` int DEFAULT NULL,
+  `Partner` int DEFAULT NULL,
+  `PaymentMethod` text,
+  `PhoneService` int DEFAULT NULL,
+  `Population` int DEFAULT NULL,
+  `PremiumTechSupport` int DEFAULT NULL,
+  `Quarter` text,
+  `ReferredaFriend` int DEFAULT NULL,
+  `SatisfactionScore` int DEFAULT NULL,
+  `SeniorCitizen` int DEFAULT NULL,
+  `State` text,
+  `StreamingMovies` int DEFAULT NULL,
+  `StreamingMusic` int DEFAULT NULL,
+  `StreamingTV` int DEFAULT NULL,
+  `TenureinMonths` int DEFAULT NULL,
+  `TotalCharges` double DEFAULT NULL,
+  `TotalExtraDataCharges` int DEFAULT NULL,
+  `TotalLongDistanceCharges` double DEFAULT NULL,
+  `TotalRefunds` double DEFAULT NULL,
+  `TotalRevenue` double DEFAULT NULL,
+  `Under30` int DEFAULT NULL,
+  `UnlimitedData` int DEFAULT NULL,
+  `ZipCode` int DEFAULT NULL,
+  `Churn` int DEFAULT NULL,
+  `row_num` int
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+INSERT INTO churn_staging1
+SELECT *,
+ROW_NUMBER() OVER(PARTITION BY Age, AvgMonthlyGBDownload, AvgMonthlyLongDistanceCharges, ChurnCategory, ChurnReason, ChurnScore, City, CLTV, Contract, Country, CustomerID, CustomerStatus, Dependents, DeviceProtectionPlan, Gender, InternetService, InternetType, LatLong, Latitude, Longitude, Married, MonthlyCharge, MultipleLines, Number_of_Dependents, Number_of_Referrals, Offer, OnlineBackup, OnlineSecurity, PaperlessBilling, Partner, PaymentMethod, PhoneService, Population, PremiumTechSupport, Quarter, ReferredaFriend, SatisfactionScore, SeniorCitizen, State, StreamingMovies, StreamingMusic, StreamingTV, TenureinMonths, TotalCharges, TotalExtraDataCharges, TotalLongDistanceCharges, TotalRefunds, TotalRevenue, Under30, UnlimitedData, ZipCode, Churn) AS row_num
+FROM sql_project.churn_staging;
+
+DELETE
+FROM sql_project.churn_staging1
+WHERE row_num>1 ;
+
+SELECT *
+FROM sql_project.churn_staging1;
+
+-- 2.Standardizarion the data
+
+select AvgMonthlyLongDistanceCharges,TRIM(AvgMonthlyLongDistanceCharges)
+from sql_project.churn_staging1;
+
+UPDATE sql_project.churn_staging1
+SET  AvgMonthlyLongDistanceCharges=TRIM(AvgMonthlyLongDistanceCharges);
+
+SELECT *
+FROM sql_project.churn_staging1;
+
+-- 3.Null values or blank values
+
+UPDATE sql_project.churn_staging1
+SET InternetType="None"
+WHERE InternetService="0";
+
+
+UPDATE sql_project.churn_staging1
+SET Offer="None"
+WHERE offer NOT LIKE "Offer%";
+
+-- 4.Remove any columns
+
+ALTER TABLE sql_project.churn_staging1
+DROP column row_num;
+
+SELECT *
+FROM sql_project.churn_staging1;
+
