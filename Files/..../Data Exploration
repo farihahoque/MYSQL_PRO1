@@ -1,0 +1,153 @@
+-- What is the overall churn rate in the dataset?
+SELECT *
+FROM sql_project.churn_staging1;
+
+SELECT 
+  COUNT(*) AS total_customers,
+  SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) AS churned,
+  ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1;
+
+-- Churn rate by Age Group
+
+select  CASE 
+    WHEN Age < 30 THEN 'Under 30'
+    WHEN Age BETWEEN 30 AND 50 THEN '30-50'
+    ELSE 'Over 50'
+  END AS age_group,count(Age),ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent_by_Age
+FROM sql_project.churn_staging1
+group by age_group;
+
+-- Counts of each Customer Status
+
+SELECT *
+FROM sql_project.churn_staging1;
+
+select CustomerStatus,count(CustomerStatus)
+FROM sql_project.churn_staging1
+group by CustomerStatus;
+
+-- distribution of customers by gender and marital status
+
+select Gender,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS Churn_percentage_Gender
+FROM sql_project.churn_staging1
+group by Gender;
+SELECT *
+FROM sql_project.churn_staging1;
+
+select 
+CASE 
+    WHEN Married = "1" THEN 'Married'
+    ELSE 'Unmarried'
+  END AS Married
+,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS Churn_percentage_Gender
+FROM sql_project.churn_staging1
+group by Married;
+
+select ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS Churn_percentage_Male
+FROM sql_project.churn_staging1
+where Gender='Male' and Married='1';
+
+select 
+CASE 
+    WHEN Married= '1' THEN 'Male_Married'
+    ELSE 'Male_Unmarried'
+  END AS MarriedOrNot,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS Churn_percentage
+FROM sql_project.churn_staging1
+where Gender='Male'
+group by MarriedOrNot
+union
+select 
+CASE 
+    WHEN Married= '1' THEN 'Female_Married'
+    ELSE 'Female_Unmarried'
+  END AS MarriedOrNot,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS Churn_percentage
+FROM sql_project.churn_staging1
+where Gender='Female'
+group by MarriedOrNot;
+
+-- How much revenue was lost to churned customers?
+select CustomerStatus,count(CustomerStatus),ROUND((SUM(TotalRevenue) * 100.0) / SUM(SUM(TotalRevenue))over(), 1) AS Revenue_Percentage 
+FROM sql_project.churn_staging1
+group by CustomerStatus;
+
+--  geographic patterns in churn
+
+SELECT distinct city,ZipCode,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent_by_Area
+FROM sql_project.churn_staging1
+group by city,ZipCode
+order by churn_rate_percent_by_Area desc;
+
+-- CLTV 
+SELECT CLTV,COUNT(CustomerID) AS NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by CLTV
+order by CLTV desc;
+
+-- Calculation of the general reasons for churn and its catagory
+select ChurnReason,ChurnCategory,COUNT(CustomerID) AS NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+where CustomerStatus="Churned"
+group by ChurnReason,ChurnCategory
+order by NUM_Of_Customers desc;
+
+-- Churn Score vs Churn
+select ChurnScore,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by ChurnScore
+order by ChurnScore desc;
+
+-- Type of internet service (DSL, Fiber Optic, None) and internet type influence churn
+select InternetType,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by InternetType
+order by churn_rate_percent desc;
+
+-- The contract type impact on churn
+select Contract,COUNT(CustomerID) NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by Contract 
+order by churn_rate_percent desc;
+
+--  relationship between charges and churn
+select Churn, round(avg(TotalCharges),2) as Avg_Tot_Charge,round(avg(TotalExtraDataCharges),2) as Avg_extraData_Charge,round(avg(TotalLongDistanceCharges),2) as Avg_Long_Distance_CHarge,round(avg(TotalRefunds),2) as Avg_refunds,round(avg(TotalRevenue),2) as Avg_revenue,COUNT(CustomerID) as NUM_Of_Customers
+FROM sql_project.churn_staging1
+group by Churn;
+
+-- Satisfaction score correlation with churn
+select SatisfactionScore,COUNT(CustomerID) NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by SatisfactionScore
+order by churn_rate_percent desc;
+
+-- offers churners have
+select Offer,COUNT(CustomerID) NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by Offer
+order by churn_rate_percent desc;
+
+-- Payment Method vs Churn
+select PaymentMethod,COUNT(CustomerID) NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by PaymentMethod
+order by churn_rate_percent desc;
+
+-- Entertainment Services vs Churn
+SELECT 
+  StreamingTV,
+  StreamingMovies,
+  StreamingMusic,
+  COUNT(CustomerID) NUM_Of_Customers,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+group by  StreamingTV, StreamingMovies, StreamingMusic
+order by churn_rate_percent desc;
+
+-- High value customers vs churning?
+
+select TenureinMonths,TotalCharges,ReferredaFriend,ROUND(SUM(CASE WHEN Churn = '1' THEN 1 ELSE 0 END) /COUNT(*) * 100, 2) AS churn_rate_percent
+FROM sql_project.churn_staging1
+where TenureinMonths>=50 and ReferredaFriend="1"
+group by TenureinMonths,TotalCharges,ReferredaFriend
+order by TotalCharges desc limit 50;
+
+ 
