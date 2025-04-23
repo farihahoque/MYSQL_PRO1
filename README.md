@@ -43,9 +43,26 @@ The dataset used for this analysis is the "Telco Customer Churn" dataset, which 
 16.  What is the relation of high-value customers to churning?
 
 ## Findings and Insights
-
-
-
-
-
-
+Some of the questions are answered from the data using MYSQL below:
+1.  What is the overall churn rate in the dataset?
+- Out of 4225 customers,1121 have churned, and the churn rate is 26.53%
+2.  How does churn rate vary across different Age groups?
+- Under 30,30-50, and over 50 people 	21.78,24.34 and 30.90, respectively. We can see churn rate increases with age group.
+3.  How does churn rate vary across different customer statuses?
+  - 2832 customers have stayed,272 customers have recently joined, and 1121 customers have churned.
+4.  What is the distribution of churn by gender and marital status?
+- Male and female churn percentage rates are 25.80 and 27.27, respectively. So female churn percentage is more than the male
+- Married and unmarried churn percentage rates are 19.20 and 33.39, respectively.
+- Married males, unmarried males, unmarried females, and married females churn rate are 18.64,32.54,34.35,19.76, respectively.
+5.  How much revenue was lost to churned customers?
+- 16.8% revenue is lost to churned customers.
+6.  Do geographic patterns relate to churn?
+- Santa Barbara,San Diego,Cupertino etc has charn rates. 
+8.  What are the general reasons for churn and its categories?
+- The maximum customers have left for the reason "competitor had better devices", and the least customers have left for "poor expertise of phone support"
+9.  How does Churn Score relate to churn?
+- Data proves that the larger the churn score, the higher the churn percentage.
+10. How do types of internet service (DSL, Fiber Optic, None) and internet type influence churn?
+- Fiber optic has the maximum churn rate while DSL has the least.
+16.  What is the relation of high-value customers to churning?
+- The customers have stayed for more than 50  years and have referred a friend, they are high value customers. They have the lowest churn rate, mostly 0.
